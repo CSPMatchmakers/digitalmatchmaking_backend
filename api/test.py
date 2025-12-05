@@ -18,9 +18,6 @@ def require_api_key(f):
         return jsonify({"error": "Unauthorized"}), 401
     return decorated
 
-@test_api.route('/users', methods=['GET'])
-def get_users():
-    return jsonify("Hello")
 
 
 @test_api.route('/joemamma', methods=['GET'])
