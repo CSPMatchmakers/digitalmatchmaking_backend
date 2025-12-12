@@ -29,6 +29,7 @@ from api.classroom_api import classroom_api
 from hacks.joke import joke_api  # Import the joke API blueprint
 from api.post import post_api  # Import the social media post API
 from api.test import test_api
+from api.matchmaking_saftey import matchmaking_api
 #from api.announcement import announcement_api ##temporary revert
 
 # database Initialization functions
@@ -71,6 +72,7 @@ app.register_blueprint(stock_api)
 app.register_blueprint(groq_api)
 app.register_blueprint(gemini_api)
 app.register_blueprint(microblog_api)
+app.register_blueprint(matchmaking_api)
 
 app.register_blueprint(analytics_api)
 app.register_blueprint(student_api)
