@@ -74,10 +74,7 @@ class MatchmakingAPI:
                 setup = create_profile_setup(uid)
                 
                 if setup:
-                    return jsonify({
-                        'message': f'Profile setup initialized for {uid}',
-                        'setup': setup
-                    }), 201
+                    return {'message': f'Profile setup initialized for {uid}', 'setup': setup}, 201
                 else:
                     return {'message': f'Failed to create profile setup for {uid}'}, 500
                     
@@ -231,42 +228,51 @@ class MatchmakingAPI:
 
     # Hi im adding things. remove this if it breaks, i need to go. will test this later.
 
-class SaveProfileJSON(Resource):
-    @token_required()
-    def post(self):
-        """Save frontend quiz/profile data to the JSON file"""
-        current_user = g.current_user
-        uid = current_user.uid
+    class SaveProfileJSON(Resource):
+        @token_required()
+        def post(self):
+            """Save frontend quiz/profile data to the JSON file
 
-        body = request.get_json() or {}
-        profile_data = body.get('profile_data')
-        if not profile_data:
-            return {'message': 'No profile_data provided'}, 400
+            Expects body:
+            {
+                "profile_data": [
+                    {"question": "q1", "response": "r1"},
+                    ...
+                ]
+            }
+            """
+            current_user = g.current_user
+            uid = current_user.uid
 
-        try:
-            setups = _read_profile_setups()
+            body = request.get_json() or {}
+            profile_data = body.get('profile_data')
+            if not profile_data:
+                return {'message': 'No profile_data provided'}, 400
 
-            # Find or create user's setup
-            user_setup = next((s for s in setups if s['uid'] == uid), None)
-            if user_setup is None:
-                user_setup = create_profile_setup(uid)
-                setups = _read_profile_setups()  # refresh after creation
+            try:
+                setups = _read_profile_setups()
+
+                # Find or create user's setup
                 user_setup = next((s for s in setups if s['uid'] == uid), None)
+                if user_setup is None:
+                    create_profile_setup(uid)
+                    setups = _read_profile_setups()  # refresh after creation
+                    user_setup = next((s for s in setups if s['uid'] == uid), None)
 
-            if 'data' not in user_setup:
-                user_setup['data'] = {}
+                if 'data' not in user_setup:
+                    user_setup['data'] = {}
 
-            for item in profile_data:
-                q = item.get('question')
-                r = item.get('response')
-                if q:
-                    user_setup['data'][q] = r
+                # Merge/overwrite profile_data items into user_setup['data']
+                for item in profile_data:
+                    q = item.get('question')
+                    r = item.get('response')
+                    if q is not None:
+                        user_setup['data'][q] = r
 
-            _write_profile_setups(setups)
-            return {'message': f'Profile data saved for {uid}', 'setup': user_setup}, 201
-
-        except Exception as e:
-            return {'message': f'Error saving profile data: {str(e)}'}, 500
+                _write_profile_setups(setups)
+                return {'message': f'Profile data saved for {uid}', 'setup': user_setup}, 201
+            except Exception as e:
+                return {'message': f'Error saving profile data: {str(e)}'}, 500
 
 
     api.add_resource(_DATA, '/data')
@@ -274,7 +280,4 @@ class SaveProfileJSON(Resource):
     api.add_resource(_SETUP, '/setup')
     api.add_resource(_ADD, '/add')
     api.add_resource(_ALL_DATA, '/all-data')
-
-    # added this too
-
     api.add_resource(SaveProfileJSON, '/save-profile-json')
