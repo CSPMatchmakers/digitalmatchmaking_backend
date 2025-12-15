@@ -210,11 +210,12 @@ class MatchmakingAPI:
                 return {'message': f'Error deleting data: {str(e)}'}, 500
 
     class _ALL_DATA(Resource):
-        @token_required()
+        # REMOVED @token_required() decorator to make this endpoint public
         def get(self):
             """Get all users' profile data.
             
             Returns all profile setups including id, uid, created_at, and data for each user.
+            NOTE: This endpoint is public to allow matchmaking without authentication.
             """
             try:
                 setups = _read_profile_setups()
@@ -225,8 +226,6 @@ class MatchmakingAPI:
                 }, 200
             except Exception as e:
                 return {'message': f'Error retrieving all data: {str(e)}'}, 500
-
-    # Hi im adding things. remove this if it breaks, i need to go. will test this later.
 
     class SaveProfileJSON(Resource):
         @token_required()
