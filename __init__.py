@@ -28,20 +28,20 @@ login_manager.init_app(app)
 
 # Allowed servers for cross-origin resource sharing (CORS)
 cors = CORS(
-   app,
-   supports_credentials=True,
-   origins=[
-       'http://localhost:4500',
-       'http://127.0.0.1:4500',
-       'http://localhost:4600',
-       'http://127.0.0.1:4600',
-       'http://localhost:4000',
-       'http://127.0.0.1:4000',
-       'https://open-coding-society.github.io',
-       'https://pages.opencodingsociety.com',
-       'https://cspmatchmakers.github.io/digitalmatchmaking',
-   ],
-   methods=["GET", "POST", "PUT", "OPTIONS"]
+    app,
+    supports_credentials=True,
+    origins=[
+        'http://localhost:4500',
+        'http://127.0.0.1:4500',
+        'http://localhost:4600',
+        'http://127.0.0.1:4600',
+        'http://localhost:4000',
+        'http://127.0.0.1:4000',
+        'https://open-coding-society.github.io',
+        'https://pages.opencodingsociety.com',
+        'https://cspmatchmakers.github.io',
+    ],
+    methods=["GET", "POST", "PUT", "OPTIONS"]
 )
 
 
