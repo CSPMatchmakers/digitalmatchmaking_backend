@@ -17,6 +17,7 @@ from __init__ import app, db, login_manager  # Key Flask objects
 from api.user import user_api 
 from api.python_exec_api import python_exec_api
 from api.javascript_exec_api import javascript_exec_api
+from api.persona_api import persona_api
 from api.section import section_api
 from api.pfp import pfp_api
 from api.stock import stock_api
@@ -39,6 +40,7 @@ from model.github import GitHubUser
 from model.feedback import Feedback
 from api.analytics import get_date_range
 # from api.grade_api import grade_api
+from model.persona import Persona, initPersonas, initPersonaUsers
 from api.study import study_api
 from api.feedback_api import feedback_api
 from model.study import Study, initStudies
@@ -63,6 +65,7 @@ app.config['KASM_API_KEY_SECRET'] = os.getenv('KASM_API_KEY_SECRET')
 
 
 # register URIs for api endpoints
+app.register_blueprint(persona_api)
 app.register_blueprint(python_exec_api)
 app.register_blueprint(javascript_exec_api)
 app.register_blueprint(user_api)
@@ -158,6 +161,12 @@ def u2table():
 def sections():
     sections = Section.query.all()
     return render_template("sections.html", sections=sections)
+
+@app.route('/persona/')
+@login_required
+def persona():
+    personas = Persona.query.all()
+    return render_template("persona.html", personas=personas)
 
 # Helper function to extract uploads for a user (ie PFP image)
 @app.route('/uploads/<path:filename>')
@@ -314,6 +323,8 @@ custom_cli = AppGroup('custom', help='Custom commands')
 def generate_data():
     initUsers()
     init_microblogs()
+    initPersonas()
+    initPersonaUsers()
 
 # Register the custom command group with the Flask application
 app.cli.add_command(custom_cli)
