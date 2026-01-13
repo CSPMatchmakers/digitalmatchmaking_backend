@@ -14,29 +14,115 @@
     
             <div class="container bg-secondary py-4">
                 <div class="p-5 mb-4 bg-light text-dark rounded-3">
-                    <form name="f" action="{{ url_for('login') }}" method="POST">
+                    <form name="f" action="{{ url_for('login') }}" method="POST" id="loginForm">
                         <table>
                             {% if error %}
-                                <tr class="alert alert-error">
-                                    Invalid username and password.
+                                <tr class="alert alert-danger">
+                                    <td colspan="2">
+                                        <strong>Error:</strong> {{ error }}
+                                    </td>
                                 </tr>
                             {% endif %}
                             {% if logout %}
                                 <tr class="alert alert-success">
-                                    You have been logged out.
+                                    <td colspan="2">You have been logged out.</td>
                                 </tr>
                             {% endif %}
                             <tr><th><label for="username">User ID</label></th></tr>
                             <tr><td><input id='username' name="username" size="20" required></td></tr>
                             <tr><th><label for="password">Password</label></th></tr>
                             <tr><td><input type="password" id="password" name="password" size="20" required></td></tr>
-                            <!-- Hidden input for 'next' page, which is set on unauthorized redirects -->
+                            <!-- Hidden input for 'next' page -->
                             <input type="hidden" name="next" value="{{ next }}">
                             <tr><th><input type="submit" value="Submit"></th></tr>
                         </table>
                     </form>
+                    
+                    <!-- Debug Information Section -->
+                    <div id="debugInfo" class="mt-4 p-3 bg-warning text-dark rounded" style="display: none;">
+                        <h5>Debug Information:</h5>
+                        <div id="debugContent"></div>
+                    </div>
                 </div>
-
+            </div>
         </div>
     </div>
+
+    <script>
+        // Debug mode toggle (enable in development)
+        const DEBUG_MODE = true;
+        
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            if (!DEBUG_MODE) return; // Skip debugging in production
+            
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const nextPage = document.querySelector('input[name="next"]').value;
+            
+            const debugDiv = document.getElementById('debugInfo');
+            const debugContent = document.getElementById('debugContent');
+            
+            debugDiv.style.display = 'block';
+            debugContent.innerHTML = '<p>Attempting login...</p>';
+            
+            try {
+                // Log request details
+                debugContent.innerHTML += `<p><strong>Username:</strong> ${username}</p>`;
+                debugContent.innerHTML += `<p><strong>Next URL:</strong> ${nextPage || 'None'}</p>`;
+                debugContent.innerHTML += `<p><strong>Form Action:</strong> ${this.action}</p>`;
+                
+                // Make the actual POST request
+                const formData = new FormData();
+                formData.append('username', username);
+                formData.append('password', password);
+                formData.append('next', nextPage);
+                
+                const response = await fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin',
+                    redirect: 'manual'
+                });
+                
+                debugContent.innerHTML += `<p><strong>Response Status:</strong> ${response.status}</p>`;
+                debugContent.innerHTML += `<p><strong>Response Type:</strong> ${response.type}</p>`;
+                
+                // Check response
+                if (response.status === 0 && response.type === 'opaqueredirect') {
+                    debugContent.innerHTML += '<p class="text-success"><strong>✓ Login successful - redirecting...</strong></p>';
+                    // Actually submit the form now
+                    this.submit();
+                } else if (response.status === 200) {
+                    const html = await response.text();
+                    if (html.includes('Invalid username')) {
+                        debugContent.innerHTML += '<p class="text-danger"><strong>✗ Invalid credentials</strong></p>';
+                    }
+                    // Show the response page
+                    setTimeout(() => this.submit(), 2000);
+                } else if (response.status === 500) {
+                    debugContent.innerHTML += '<p class="text-danger"><strong>✗ Server Error (500)</strong></p>';
+                    debugContent.innerHTML += '<p>Check server logs for details</p>';
+                    
+                    // Try to get error details
+                    try {
+                        const errorText = await response.text();
+                        debugContent.innerHTML += `<pre class="mt-2 p-2 bg-light">${errorText.substring(0, 500)}</pre>`;
+                    } catch (e) {
+                        debugContent.innerHTML += '<p>Could not read error response</p>';
+                    }
+                } else {
+                    debugContent.innerHTML += `<p class="text-danger"><strong>✗ Unexpected status: ${response.status}</strong></p>`;
+                    setTimeout(() => this.submit(), 2000);
+                }
+                
+            } catch (error) {
+                debugContent.innerHTML += `<p class="text-danger"><strong>✗ Error:</strong> ${error.message}</p>`;
+                console.error('Login error:', error);
+                // Submit anyway after delay
+                setTimeout(() => this.submit(), 2000);
+            }
+        });
+    </script>
 {% endblock %}
