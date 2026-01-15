@@ -378,6 +378,7 @@ class UserAPI:
                                 httponly=True,
                                 path='/',
                                 samesite='None',
+                                domain='.opencodingsociety.com'
                             )
                         else:
                             resp.set_cookie(
@@ -434,6 +435,7 @@ class UserAPI:
                         httponly=True,
                         path='/',
                         samesite='None',
+                        domain='.opencodingsociety.com'
                     )
                 else:
                     resp.set_cookie(
