@@ -377,17 +377,19 @@ class UserAPI:
                                 secure=True,
                                 httponly=True,
                                 path='/',
-                                samesite='None'
+                                samesite='None',
+                                domain='.opencodingsociety.com'
                             )
                         else:
                             resp.set_cookie(
                                 current_app.config["JWT_TOKEN_NAME"],
                                 token,
                                 max_age=43200,  # 12 hours in seconds
-                                secure=False,
+                                secure=True,
                                 httponly=False,  # Set to True for more security if JS access not needed
                                 path='/',
-                                samesite='Lax'
+                                samesite='None',
+                                domain='.opencodingsociety.com'
                             )
                         print(f"Token set: {token}")
                         return resp 
@@ -433,17 +435,19 @@ class UserAPI:
                         secure=True,
                         httponly=True,
                         path='/',
-                        samesite='None'
+                        samesite='None',
+                        domain='.opencodingsociety.com'  # ← ADD THIS LINE
                     )
                 else:
                     resp.set_cookie(
                         current_app.config["JWT_TOKEN_NAME"],
                         token,
                         max_age=0,  # Immediately expire the cookie
-                        secure=False,
+                        secure=True,
                         httponly=False,  # Set to True for more security if JS access not needed
                         path='/',
-                        samesite='Lax'
+                        samesite='None',
+                        domain='.opencodingsociety.com'  # ← ADD THIS LINE
                     )
                 return resp
             except Exception as e:
