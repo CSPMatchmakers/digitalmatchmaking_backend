@@ -436,18 +436,16 @@ class UserAPI:
                         httponly=True,
                         path='/',
                         samesite='None',
-                        domain='.opencodingsociety.com'  # ← ADD THIS LINE
                     )
                 else:
                     resp.set_cookie(
                         current_app.config["JWT_TOKEN_NAME"],
                         token,
                         max_age=0,  # Immediately expire the cookie
-                        secure=True,
+                        secure=False,
                         httponly=False,  # Set to True for more security if JS access not needed
                         path='/',
-                        samesite='None',
-                        domain='.opencodingsociety.com'  # ← ADD THIS LINE
+                        samesite='Lax',
                     )
                 return resp
             except Exception as e:
