@@ -378,18 +378,16 @@ class UserAPI:
                                 httponly=True,
                                 path='/',
                                 samesite='None',
-                                domain='.opencodingsociety.com'
                             )
                         else:
                             resp.set_cookie(
                                 current_app.config["JWT_TOKEN_NAME"],
                                 token,
                                 max_age=43200,  # 12 hours in seconds
-                                secure=True,
+                                secure=False,
                                 httponly=False,  # Set to True for more security if JS access not needed
                                 path='/',
-                                samesite='None',
-                                domain='.opencodingsociety.com'
+                                samesite='Lax',
                             )
                         print(f"Token set: {token}")
                         return resp 
