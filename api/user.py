@@ -424,7 +424,7 @@ class UserAPI:
                 
                 # Prepare a response indicating the token has been invalidated
                 resp = Response("Token invalidated successfully")
-                is_production = not (request.host.startswith('localhost') or request.host.startswith('127.0.0.1'))
+                is_production = not app.config['IS_PRODUCTION']
                 if is_production:
                     resp.set_cookie(
                         current_app.config["JWT_TOKEN_NAME"],
