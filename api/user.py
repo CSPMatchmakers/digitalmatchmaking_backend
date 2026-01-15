@@ -355,7 +355,7 @@ class UserAPI:
                             algorithm="HS256"
                         )
                         # Return JSON response with cookie
-                        is_production = not (request.host.startswith('localhost') or request.host.startswith('127.0.0.1'))
+                        is_production =  bool(current_app.config['IS_PRODUCTION'])
                         
                         # Create JSON response
                         response_data = {
@@ -424,7 +424,7 @@ class UserAPI:
                 
                 # Prepare a response indicating the token has been invalidated
                 resp = Response("Token invalidated successfully")
-                is_production = not app.config['IS_PRODUCTION']
+                is_production =  bool(current_app.config['IS_PRODUCTION'])
                 if is_production:
                     resp.set_cookie(
                         current_app.config["JWT_TOKEN_NAME"],
