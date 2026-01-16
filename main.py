@@ -39,6 +39,7 @@ from model.user import Section;
 from model.github import GitHubUser
 from model.feedback import Feedback
 from api.analytics import get_date_range
+from model.pii_quiz import initProfileQuizzes
 # from api.grade_api import grade_api
 from model.persona import Persona, initPersonas, initPersonaUsers
 from api.study import study_api
@@ -325,6 +326,7 @@ def generate_data():
     init_microblogs()
     initPersonas()
     initPersonaUsers()
+    initProfileQuizzes()
 
 # Register the custom command group with the Flask application
 app.cli.add_command(custom_cli)

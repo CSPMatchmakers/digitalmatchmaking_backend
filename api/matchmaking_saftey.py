@@ -227,65 +227,9 @@ class MatchmakingAPI:
             except Exception as e:
                 return {'message': f'Error retrieving all data: {str(e)}'}, 500
 
-    
-    class _SAVE_PROFILE_JSON(Resource):
-        @token_required()
-        def post(self):
-            """Save frontend quiz/profile data to the JSON file"""
-            current_user = g.current_user
-            uid = current_user.uid
-
-            body = request.get_json() or {}
-            profile_data = body.get('profile_data')
-            
-            if not profile_data:
-                return {'message': 'No profile_data provided'}, 400
-
-            try:
-                setups = _read_profile_setups()
-
-                # Find or create user's setup
-                user_setup = next((s for s in setups if s['uid'] == uid), None)
-                if user_setup is None:
-                    create_profile_setup(uid)
-                    setups = _read_profile_setups()
-                    user_setup = next((s for s in setups if s['uid'] == uid), None)
-
-                if 'data' not in user_setup:
-                    user_setup['data'] = {}
-
-                # Store the entire profile_data array
-                user_setup['data']['profile_quiz'] = profile_data
-
-                _write_profile_setups(setups)
-                return {'message': f'Profile data saved for {uid}', 'setup': user_setup}, 201
-            except Exception as e:
-                return {'message': f'Error saving profile data: {str(e)}'}, 500
-
-        @token_required()
-        def get(self):
-            """Retrieve the user's profile quiz data"""
-            current_user = g.current_user
-            uid = current_user.uid
-
-            try:
-                setups = _read_profile_setups()
-                user_setup = next((s for s in setups if s['uid'] == uid), None)
-                
-                if user_setup is None or 'data' not in user_setup or 'profile_quiz' not in user_setup['data']:
-                    return {'message': f'No profile data found for {uid}'}, 404
-                
-                return {
-                    'message': f'Profile data for {uid}',
-                    'profile_data': user_setup['data']['profile_quiz']
-                }, 200
-            except Exception as e:
-                return {'message': f'Error retrieving profile data: {str(e)}'}, 500
-
     # Register all resources
     api.add_resource(_DATA, '/data')
     api.add_resource(_WRITE, '/data-write')
     api.add_resource(_SETUP, '/setup')
     api.add_resource(_ADD, '/add')
     api.add_resource(_ALL_DATA, '/all-data')
-    api.add_resource(_SAVE_PROFILE_JSON, '/save-profile-json')
