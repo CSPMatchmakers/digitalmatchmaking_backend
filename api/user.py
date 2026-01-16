@@ -356,7 +356,7 @@ class UserAPI:
                             algorithm="HS256"
                         )
                         # Return JSON response with cookie
-                        is_production = os.environ.get('IS_PRODUCTION')
+                        is_production = os.environ.get('IS_PRODUCTION', 'false').lower() == 'true'
                         
                         # Create JSON response
                         response_data = {
@@ -370,7 +370,7 @@ class UserAPI:
                         resp = jsonify(response_data)
                         
                         # Set cookie
-                        if is_production == True:
+                        if is_production:
                             resp.set_cookie(
                                 current_app.config["JWT_TOKEN_NAME"],
                                 token,
@@ -426,8 +426,8 @@ class UserAPI:
                 
                 # Prepare a response indicating the token has been invalidated
                 resp = Response("Token invalidated successfully")
-                is_production = os.environ.get('IS_PRODUCTION')
-                if is_production == True:
+                is_production = os.environ.get('IS_PRODUCTION', 'false').lower() == 'true'
+                if is_production:
                     resp.set_cookie(
                         current_app.config["JWT_TOKEN_NAME"],
                         token,
