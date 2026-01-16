@@ -70,6 +70,7 @@ app.config['JWT_TOKEN_NAME'] = JWT_TOKEN_NAME
 
 
 # Database settings
+IS_PRODUCTION = os.environ.get('IS_PRODUCTION') or None
 dbName = 'user_management'
 DB_ENDPOINT = os.environ.get('DB_ENDPOINT') or None
 DB_USERNAME = os.environ.get('DB_USERNAME') or None

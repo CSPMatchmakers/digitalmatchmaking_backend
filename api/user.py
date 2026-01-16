@@ -6,6 +6,7 @@ from __init__ import app
 from api.jwt_authorize import token_required
 from model.user import User
 from model.github import GitHubUser
+import os
 
 user_api = Blueprint('user_api', __name__,
                    url_prefix='/api')
@@ -355,7 +356,7 @@ class UserAPI:
                             algorithm="HS256"
                         )
                         # Return JSON response with cookie
-                        is_production = bool(int(current_app.config.get('IS_PRODUCTION', 0)))
+                        is_production = os.environ.get('IS_PRODUCTION')
                         
                         # Create JSON response
                         response_data = {
@@ -369,7 +370,7 @@ class UserAPI:
                         resp = jsonify(response_data)
                         
                         # Set cookie
-                        if is_production:
+                        if is_production == True:
                             resp.set_cookie(
                                 current_app.config["JWT_TOKEN_NAME"],
                                 token,
@@ -425,8 +426,8 @@ class UserAPI:
                 
                 # Prepare a response indicating the token has been invalidated
                 resp = Response("Token invalidated successfully")
-                is_production = bool(int(current_app.config.get('IS_PRODUCTION', 0)))
-                if is_production:
+                is_production = os.environ.get('IS_PRODUCTION')
+                if is_production == True:
                     resp.set_cookie(
                         current_app.config["JWT_TOKEN_NAME"],
                         token,
