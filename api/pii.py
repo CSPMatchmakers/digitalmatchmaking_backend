@@ -1,5 +1,5 @@
 import jwt
-from flask import Blueprint, app, request, jsonify, current_app, Response, g, Flask
+from flask import Blueprint, app, request, jsonify, current_app, Response, g, Flask, make_response
 from flask_restful import Api, Resource # used for REST API building
 from datetime import datetime
 from __init__ import app
@@ -10,13 +10,48 @@ from model.github import GitHubUser
 import os
 import json
 from model.pii_quiz import ProfileQuiz
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
+from functools import wraps
+
 pii_api = Blueprint('pii_api', __name__, url_prefix='/api/pii')
+
+# Configure CORS for this blueprint
+CORS(pii_api, 
+     origins=["http://localhost:4600", "http://127.0.0.1:4600", "http://localhost:4500", "http://127.0.0.1:4500"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+     allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+     supports_credentials=True,
+     expose_headers=["Content-Type", "Authorization"],
+     max_age=3600)
+
+# Add after_request handler to ensure CORS headers on all responses
+@pii_api.after_request
+def after_request(response):
+    origin = request.headers.get('Origin')
+    allowed_origins = [
+        'http://localhost:4600',
+        'http://127.0.0.1:4600',
+        'http://localhost:4500',
+        'http://127.0.0.1:4500'
+    ]
+    
+    if origin in allowed_origins:
+        response.headers.add('Access-Control-Allow-Origin', origin)
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+    
+    return response
+
 api = Api(pii_api)
 
 class PIIAPI:
     
     class _SAVE_PROFILE(Resource):
+        def options(self):
+            """Handle preflight OPTIONS request."""
+            return {'message': 'OK'}, 200
+        
         @token_required()
         def post(self):
             """Save or update user's PII quiz profile data to database."""
@@ -103,6 +138,10 @@ class PIIAPI:
                 return {'message': f'Error deleting profile data: {str(e)}'}, 500
     
     class _ALL_PROFILES(Resource):
+        def options(self):
+            """Handle preflight OPTIONS request."""
+            return {'message': 'OK'}, 200
+        
         def get(self):
             """Get all users' profile quiz data (public endpoint for matchmaking)."""
             try:
@@ -125,6 +164,10 @@ class PIIAPI:
                 return {'message': f'Error retrieving all profiles: {str(e)}'}, 500
     
     class _SAFE_PROFILE(Resource):
+        def options(self):
+            """Handle preflight OPTIONS request."""
+            return {'message': 'OK'}, 200
+        
         @token_required()
         def get(self):
             """Get user's safe profile data (PII filtered)."""
