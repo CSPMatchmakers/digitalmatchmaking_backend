@@ -49,6 +49,7 @@ from model.study import Study, initStudies
 from model.classroom import Classroom
 from model.post import Post, init_posts
 from model.microblog import MicroBlog, Topic, init_microblogs
+from model.matchmakers import MatchmakersData, initMatchmakersData
 from hacks.jokes import initJokes 
 # from model.announcement import Announcement ##temporary revert
 
@@ -105,7 +106,7 @@ def unauthorized_callback():
 # register URIs for server pages
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 @app.context_processor
 def inject_user():
@@ -171,6 +172,12 @@ def persona():
     personas = Persona.query.all()
     return render_template("persona.html", personas=personas)
 
+@app.route('/matchmakers/')
+@login_required
+def matchmakers():
+    matchmakers_records = MatchmakersData.query.all()
+    return render_template("matchmakers.html", matchmakers_records=matchmakers_records)
+
 # Helper function to extract uploads for a user (ie PFP image)
 @app.route('/uploads/<path:filename>')
 def uploaded_file(filename):
@@ -179,7 +186,7 @@ def uploaded_file(filename):
 @app.route('/users/delete/<int:user_id>', methods=['DELETE'])
 @login_required
 def delete_user(user_id):
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
     if user:
         user.delete()
         return jsonify({'message': 'User deleted successfully'}), 200
@@ -191,7 +198,7 @@ def reset_password(user_id):
     if current_user.role != 'Admin':
         return jsonify({'error': 'Unauthorized'}), 403
     
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
     if not user:
         return jsonify({'error': 'User not found'}), 404
 
@@ -329,6 +336,7 @@ def generate_data():
     initPersonas()
     initPersonaUsers()
     initProfileQuizzes()
+    initMatchmakersData()
 
 # Register the custom command group with the Flask application
 app.cli.add_command(custom_cli)

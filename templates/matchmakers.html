@@ -1,0 +1,135 @@
+{% extends "layouts/base.html" %}
+
+{% block body %}
+
+<style>
+.data-preview {
+    max-height: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: pre-wrap;
+    font-family: monospace;
+    font-size: 0.8em;
+}
+</style>
+
+<div class="container mt-5">
+    <h1>Matchmakers Data Management</h1>
+
+    <table class="table table-striped" id="matchmakersTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Section</th>
+                <th>Data</th>
+                <th>Created At</th>
+                <th>Updated At</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in matchmakers_records %}
+            <tr id="record-{{ record.id }}">
+                <td>{{ record.id }}</td>
+                <td>{{ record.user.name if record.user else "User " ~ record.user_id }}</td>
+                <td>{{ record.section }}</td>
+                <td class="data-cell">
+                    <div class="data-preview">{{ record.data|tojson(indent=2) }}</div>
+                </td>
+                <td>{{ record.created_at.strftime('%Y-%m-%d %H:%M') if record.created_at else '' }}</td>
+                <td>{{ record.updated_at.strftime('%Y-%m-%d %H:%M') if record.updated_at else '' }}</td>
+                <td>
+                    <button class="btn btn-info btn-sm view-btn" data-id="{{ record.id }}">View</button>
+                    {% if current_user.role == 'Admin' %}
+                    <button class="btn btn-danger btn-sm delete-btn" data-id="{{ record.id }}">Delete</button>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Add New Record Button -->
+    {% if current_user.role == 'Admin' %}
+    <!-- <button class="btn btn-success" id="addRecordBtn">Add New Record</button> -->
+    {% endif %}
+</div>
+
+<!-- View/Edit Modal -->
+<div class="modal fade" id="matchmakersModal" tabindex="-1" role="dialog" aria-labelledby="matchmakersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="matchmakersModalLabel">Matchmakers Data Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="matchmakersForm">
+                    <input type="hidden" id="recordId">
+
+                    <div class="form-group">
+                        <label for="recordUserId">User</label>
+                        <input type="text" class="form-control" id="recordUserId" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="recordSection">Section</label>
+                        <input type="text" class="form-control" id="recordSection" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="recordData">Data (JSON)</label>
+                        <textarea class="form-control" id="recordData" rows="8" readonly></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Handle view button
+        $(document).on('click', '.view-btn', function() {
+            const id = $(this).data('id');
+            const row = $(`#record-${id}`);
+            const user = row.find('td:nth-child(2)').text();
+            const section = row.find('td:nth-child(3)').text();
+            const data = row.find('.data-preview').text();
+
+            $('#recordId').val(id);
+            $('#recordUserId').val(user);
+            $('#recordSection').val(section);
+            $('#recordData').val(data.replace('...', ''));
+
+            // Make form read-only
+            $('#matchmakersForm input, #matchmakersForm select, #matchmakersForm textarea').prop('disabled', true);
+            $('#saveBtn').hide();
+            $('#matchmakersModalLabel').text('View Matchmakers Data');
+
+            $('#matchmakersModal').modal('show');
+        });
+
+        // Handle delete button (placeholder - would need API endpoint)
+        $(document).on('click', '.delete-btn', async function() {
+            const id = $(this).data('id');
+            if (confirm('Are you sure you want to delete this record?')) {
+                alert('Delete functionality not yet implemented');
+            }
+        });
+    });
+</script>
+
+{% endblock %}
+
+{% block background %}
+{% endblock %}

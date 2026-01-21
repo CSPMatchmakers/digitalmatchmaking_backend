@@ -76,7 +76,7 @@ class Section(db.Model):
     # Overlaps setting silences SQLAlchemy warnings about multiple relationship paths
     # No backref needed as User has its own 'sections' relationship
     users = db.relationship('User', secondary='user_sections', lazy='subquery',
-                            overlaps="user_sections_rel,user,sections")    
+                            overlaps="user_sections_rel,user,sections,section_users_rel")    
     
     # Constructor
     def __init__(self, name, abbreviation):
@@ -162,7 +162,7 @@ class User(db.Model, UserMixin):
     # Overlaps setting silences SQLAlchemy warnings about multiple relationship paths
     # No backref needed as Section has its own 'users' relationship
     sections = db.relationship('Section', secondary='user_sections', lazy='subquery',
-                               overlaps="user_sections_rel,section,users")
+                               overlaps="user_sections_rel,section,users,section_users_rel")
     
     # Define many-to-many relationship with Persona model through UserPersona table
     # Overlaps setting silences SQLAlchemy warnings about multiple relationship paths
