@@ -25,6 +25,7 @@ from api.analytics import analytics_api
 from api.student import student_api
 from api.groq_api import groq_api
 from api.gemini_api import gemini_api
+from api.anthropic_api import anthropic_api
 from api.microblog_api import microblog_api
 from api.classroom_api import classroom_api
 from hacks.joke import joke_api  # Import the joke API blueprint
@@ -77,6 +78,7 @@ app.register_blueprint(pfp_api)
 app.register_blueprint(stock_api)
 app.register_blueprint(groq_api)
 app.register_blueprint(gemini_api)
+app.register_blueprint(anthropic_api)
 app.register_blueprint(microblog_api)
 app.register_blueprint(matchmaking_api)
 
