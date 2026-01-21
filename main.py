@@ -32,7 +32,6 @@ from hacks.joke import joke_api  # Import the joke API blueprint
 from api.post import post_api  # Import the social media post API
 from api.test import test_api
 from api.matchmaking_saftey import matchmaking_api
-from api.pii import pii_api
 #from api.announcement import announcement_api ##temporary revert
 
 # database Initialization functions
@@ -41,7 +40,6 @@ from model.user import Section;
 from model.github import GitHubUser
 from model.feedback import Feedback
 from api.analytics import get_date_range
-from model.pii_quiz import initProfileQuizzes
 # from api.grade_api import grade_api
 from model.persona import Persona, initPersonas, initPersonaUsers
 from api.study import study_api
@@ -91,7 +89,6 @@ app.register_blueprint(feedback_api)
 app.register_blueprint(joke_api)  # Register the joke API blueprint
 app.register_blueprint(post_api)  # Register the social media post API
 app.register_blueprint(test_api)
-app.register_blueprint(pii_api)
 # app.register_blueprint(announcement_api) ##temporary revert
 
 # Jokes file initialization
@@ -337,7 +334,6 @@ def generate_data():
     init_microblogs()
     initPersonas()
     initPersonaUsers()
-    initProfileQuizzes()
     initMatchmakersData()
 
 # Register the custom command group with the Flask application

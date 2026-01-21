@@ -3,6 +3,7 @@
 import jwt
 from flask import Blueprint, app, request, jsonify, current_app, Response, g, Flask
 from flask_restful import Api, Resource # used for REST API building
+from flask_cors import CORS
 from datetime import datetime
 from __init__ import app
 from api.jwt_authorize import token_required
@@ -264,6 +265,66 @@ class MatchmakingAPI:
                 }, 200
             except Exception as e:
                 return {'message': f'Error retrieving all data: {str(e)}'}, 500
+    
+    class _SAVE_PROFILE_JSON(Resource):
+        @token_required()
+        def post(self):
+            """Save frontend quiz/profile data to the JSON file"""
+            current_user = g.current_user
+            uid = current_user.uid
+
+            body = request.get_json() or {}
+            profile_data = body.get('profile_data')
+            
+            if not profile_data:
+                return {'message': 'No profile_data provided'}, 400
+
+            try:
+                # Use MatchmakersData (DB) to store profile quiz under section 'profile'
+                profile_records = MatchmakersData.get_user_matchmakers_data(current_user.id, section='profile')
+
+                if not profile_records:
+                    # create a new profile record
+                    profile_record = MatchmakersData(current_user, 'profile', {})
+                    profile_record.create()
+                else:
+                    profile_record = profile_records[0]
+
+                # Ensure data is a dict
+                current_data = profile_record.data if profile_record.data else {}
+                current_data['profile_quiz'] = profile_data
+
+                # Update the DB record
+                profile_record.update(current_data)
+
+                return {'message': f'Profile data saved for {uid}', 'setup': profile_record.data}, 201
+            except Exception as e:
+                return {'message': f'Error saving profile data: {str(e)}'}, 500
+
+        @token_required()
+        def get(self):
+            """Retrieve the user's profile quiz data"""
+            current_user = g.current_user
+            uid = current_user.uid
+
+            try:
+                profile_records = MatchmakersData.get_user_matchmakers_data(current_user.id, section='profile')
+                if not profile_records:
+                    return {'message': f'No profile data found for {uid}'}, 404
+
+                profile_record = profile_records[0]
+                current_data = profile_record.data if profile_record.data else {}
+
+                if 'profile_quiz' not in current_data:
+                    return {'message': f'No profile data found for {uid}'}, 404
+
+                return {
+                    'message': f'Profile data for {uid}',
+                    'profile_data': current_data['profile_quiz']
+                }, 200
+            except Exception as e:
+                return {'message': f'Error retrieving profile data: {str(e)}'}, 500
+
 
     # Register all resources
     api.add_resource(_DATA, '/data')
@@ -271,3 +332,4 @@ class MatchmakingAPI:
     api.add_resource(_SETUP, '/setup')
     api.add_resource(_ADD, '/add')
     api.add_resource(_ALL_DATA, '/all-data')
+    api.add_resource(_SAVE_PROFILE_JSON, '/save')
