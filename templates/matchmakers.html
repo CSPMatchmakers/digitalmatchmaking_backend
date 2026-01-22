@@ -3,20 +3,879 @@
 {% block body %}
 
 <style>
-.data-preview {
-    max-height: 100px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: pre-wrap;
-    font-family: monospace;
-    font-size: 0.8em;
-}
+    /* Dark Theme */
+    body {
+        background-color: #0d1117;
+        color: #ffffff;
+    }
+
+    .container {
+        background-color: #0d1117;
+        max-width: 1400px;
+    }
+
+    /* Page Header */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 40px;
+        padding-bottom: 25px;
+        border-bottom: 2px solid #30363d;
+        position: relative;
+    }
+
+    .header-content {
+        flex: 1;
+    }
+
+    h1 {
+        color: #ffffff;
+        font-weight: 700;
+        margin-bottom: 10px;
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, #58a6ff 0%, #79c0ff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: none;
+    }
+
+    .subtitle {
+        color: #8b949e;
+        font-size: 1rem;
+        margin: 0;
+        font-weight: 400;
+    }
+
+    /* Control Panel Button */
+    .control-panel-btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #238636 0%, #2ea043 100%);
+        border: 2px solid #238636;
+        color: #ffffff;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(35, 134, 54, 0.3);
+        animation: pulse 2s infinite;
+    }
+
+    .control-panel-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(35, 134, 54, 0.5);
+        animation: none;
+    }
+
+    .control-panel-btn:active {
+        transform: scale(0.95);
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            box-shadow: 0 4px 12px rgba(35, 134, 54, 0.3);
+        }
+        50% {
+            box-shadow: 0 4px 20px rgba(35, 134, 54, 0.6);
+        }
+    }
+
+    .control-icon {
+        display: inline-block;
+        animation: spin 3s linear infinite;
+    }
+
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .control-panel-btn:hover .control-icon {
+        animation: none;
+    }
+
+    /* Control Panel */
+    .control-panel {
+        background-color: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .control-panel-content h3 {
+        color: #58a6ff;
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+
+    .control-panel-content p {
+        color: #8b949e;
+    }
+
+    /* Table Wrapper */
+    .table-wrapper {
+        background-color: #161b22;
+        border-radius: 12px;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+        border: 1px solid #30363d;
+    }
+
+    /* Table Styling */
+    .table {
+        background-color: #161b22;
+        border-color: #30363d;
+        color: #ffffff;
+        border-radius: 0;
+        overflow: hidden;
+        box-shadow: none;
+        margin: 0;
+    }
+
+    .table thead th {
+        background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+        color: #58a6ff;
+        border-color: #30363d;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 1.2px;
+        padding: 18px 15px;
+        position: sticky;
+        top: 0;
+        box-shadow: inset 0 1px 0 #30363d;
+    }
+
+    .table tbody td {
+        border-color: #30363d;
+        padding: 14px 15px;
+        vertical-align: middle;
+        color: #ffffff;
+        font-size: 0.95rem;
+    }
+
+    .table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #21262d;
+    }
+
+    .table tbody tr:hover {
+        background-color: #1c2128;
+        box-shadow: inset 0 0 10px rgba(88, 166, 255, 0.1);
+        transform: scale(1.005);
+        transform-origin: left;
+    }
+
+    .table tbody tr:nth-child(even) {
+        background-color: #161b22;
+    }
+
+    .table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    /* Action Buttons Container */
+    .btn-group {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    /* Button Styling */
+    .btn-info {
+        background-color: #1f6feb;
+        border-color: #1f6feb;
+        color: #fff;
+        transition: all 0.2s ease;
+        font-weight: 500;
+        padding: 6px 12px;
+    }
+
+    .btn-info:hover {
+        background-color: #388bfd;
+        border-color: #388bfd;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(31, 111, 235, 0.4);
+    }
+
+    .btn-warning {
+        background-color: #d29922;
+        border-color: #d29922;
+        color: #fff;
+        transition: all 0.2s ease;
+        font-weight: 500;
+        padding: 6px 12px;
+    }
+
+    .btn-warning:hover {
+        background-color: #e0a944;
+        border-color: #e0a944;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(210, 153, 34, 0.4);
+    }
+
+    .btn-danger {
+        background-color: #da3633;
+        border-color: #da3633;
+        color: #fff;
+        transition: all 0.2s ease;
+        font-weight: 500;
+        padding: 6px 12px;
+    }
+
+    .btn-danger:hover {
+        background-color: #f85149;
+        border-color: #f85149;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(248, 81, 73, 0.4);
+    }
+
+    .btn-secondary {
+        background-color: #21262d;
+        border-color: #30363d;
+        color: #ffffff;
+        transition: all 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+        background-color: #30363d;
+        border-color: #484f58;
+        color: #ffffff;
+    }
+
+    .btn-primary {
+        background-color: #238636;
+        border-color: #238636;
+        color: #fff;
+        transition: all 0.2s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #2ea043;
+        border-color: #2ea043;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(35, 134, 54, 0.4);
+    }
+
+    .btn-sm {
+        padding: 5px 10px;
+        font-size: 0.85rem;
+        border-radius: 4px;
+    }
+
+    /* Modal Styling */
+    .modal-content {
+        background-color: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+        border-bottom: 1px solid #30363d;
+        padding: 20px;
+    }
+
+    .modal-title {
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 1.3rem;
+    }
+
+    .modal-body {
+        background-color: #161b22;
+        padding: 20px;
+        color: #ffffff;
+    }
+
+    .modal-footer {
+        background-color: #0d1117;
+        border-top: 1px solid #30363d;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    /* Form Styling */
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        color: #ffffff;
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .form-control {
+        background-color: #0d1117 !important;
+        border: 1px solid #30363d;
+        color: #ffffff !important;
+        border-radius: 4px;
+        padding: 10px 12px;
+        transition: all 0.2s ease;
+        font-family: 'Monaco', 'Courier New', monospace;
+    }
+
+    .form-control:focus {
+        background-color: #0d1117 !important;
+        border-color: #58a6ff;
+        color: #ffffff !important;
+        box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2);
+    }
+
+    .form-control::placeholder {
+        color: #8b949e;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 200px;
+        font-size: 0.9rem;
+        background-color: #0d1117 !important;
+        color: #ffffff !important;
+    }
+
+    input.form-control {
+        background-color: #0d1117 !important;
+        color: #ffffff !important;
+    }
+
+    input.form-control:disabled {
+        background-color: #161b22 !important;
+        color: #8b949e !important;
+        border-color: #30363d;
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #0d1117;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #30363d;
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #484f58;
+    }
+
+    /* Animations */
+    .modal.fade .modal-dialog {
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .page-header {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .table {
+            font-size: 0.9rem;
+        }
+
+        .table thead th {
+            padding: 10px;
+            font-size: 0.7rem;
+        }
+
+        .table tbody td {
+            padding: 8px 10px;
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 0.75rem;
+        }
+
+        .btn-group {
+            flex-direction: column;
+        }
+    }
+
+    /* Control Panel Styles */
+    .cp-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #30363d;
+        flex-wrap: wrap;
+    }
+
+    .cp-tab-btn {
+        background: none;
+        border: none;
+        color: #8b949e;
+        padding: 12px 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        border-bottom: 3px solid transparent;
+        margin-bottom: -2px;
+    }
+
+    .cp-tab-btn:hover {
+        color: #58a6ff;
+        background-color: rgba(88, 166, 255, 0.1);
+    }
+
+    .cp-tab-btn.active {
+        color: #58a6ff;
+        border-bottom-color: #58a6ff;
+    }
+
+    .cp-tab-content {
+        display: none;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .cp-tab-content.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* Metrics Grid */
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .metric-card {
+        background: linear-gradient(135deg, #1c2128 0%, #21262d 100%);
+        border: 1px solid #30363d;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .metric-card:hover {
+        border-color: #58a6ff;
+        box-shadow: 0 0 15px rgba(88, 166, 255, 0.2);
+        transform: translateY(-5px);
+    }
+
+    .metric-label {
+        color: #8b949e;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .metric-value {
+        color: #58a6ff;
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .metric-value.error {
+        color: #f85149;
+    }
+
+    /* Status Container */
+    .status-container {
+        background: linear-gradient(135deg, #1c2128 0%, #21262d 100%);
+        border: 1px solid #30363d;
+        border-radius: 8px;
+        padding: 20px;
+    }
+
+    .status-box h4 {
+        color: #58a6ff;
+        margin-bottom: 20px;
+        font-size: 1.1rem;
+    }
+
+    .status-info {
+        margin-bottom: 20px;
+    }
+
+    .status-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        background-color: rgba(13, 17, 23, 0.5);
+        border-radius: 4px;
+        margin-bottom: 10px;
+        border-left: 3px solid #30363d;
+    }
+
+    .status-label {
+        color: #8b949e;
+        font-weight: 500;
+    }
+
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        background-color: #238636;
+        color: #ffffff;
+    }
+
+    .status-badge.paused {
+        background-color: #da3633;
+    }
+
+    .status-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    /* Logs Container */
+    .logs-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    .logs-section {
+        background: linear-gradient(135deg, #1c2128 0%, #21262d 100%);
+        border: 1px solid #30363d;
+        border-radius: 8px;
+        padding: 15px;
+    }
+
+    .logs-section h4 {
+        color: #58a6ff;
+        margin-bottom: 15px;
+        font-size: 1rem;
+    }
+
+    .log-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .log-item {
+        background-color: rgba(13, 17, 23, 0.5);
+        border-left: 3px solid #238636;
+        padding: 10px;
+        margin-bottom: 8px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        color: #c9d1d9;
+    }
+
+    .log-item.error {
+        border-left-color: #f85149;
+    }
+
+    .log-item.warning {
+        border-left-color: #d29922;
+    }
+
+    .log-time {
+        color: #8b949e;
+        font-size: 0.75rem;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .log-message {
+        color: #c9d1d9;
+        margin-bottom: 4px;
+    }
+
+    .log-loading {
+        color: #8b949e;
+        text-align: center;
+        padding: 20px;
+        font-style: italic;
+    }
+
+    /* Actions Container */
+    .actions-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .action-box {
+        background: linear-gradient(135deg, #1c2128 0%, #21262d 100%);
+        border: 1px solid #30363d;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .action-box:hover {
+        border-color: #58a6ff;
+        box-shadow: 0 0 15px rgba(88, 166, 255, 0.1);
+    }
+
+    .action-box h4 {
+        color: #58a6ff;
+        margin-bottom: 8px;
+        font-size: 1rem;
+    }
+
+    .action-box p {
+        color: #8b949e;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+    }
+
+    .action-box .btn {
+        margin-top: 10px;
+        width: 100%;
+    }
+
+    /* Control Panel Refresh */
+    .cp-refresh {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 15px;
+        border-top: 1px solid #30363d;
+        margin-top: 20px;
+    }
+
+    .refresh-time {
+        color: #8b949e;
+        font-size: 0.85rem;
+    }
+
+    /* Control Panel Animations */
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .control-panel {
+        animation: slideDown 0.3s ease;
+    }
+
+    .control-panel-header {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #30363d;
+    }
+
+    .control-panel-header h3 {
+        color: #58a6ff;
+        margin-bottom: 5px;
+        font-size: 1.3rem;
+    }
+
+    .control-subtitle {
+        color: #8b949e;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
 </style>
 
 <div class="container mt-5">
-    <h1>Matchmakers Data Management</h1>
+    <div class="page-header">
+        <div class="header-content">
+            <h1>⚙️ Matchmakers Data Management</h1>
+            <p class="subtitle">Manage and configure matchmaker records</p>
+        </div>
+    </div>
 
-    <table class="table table-striped" id="matchmakersTable">
+    <!-- Control Panel (Visible by default) -->
+    <div id="controlPanel" class="control-panel">
+        <div class="control-panel-header">
+            <h3>Control Panel Dashboard</h3>
+            <p class="control-subtitle">Database Management & Monitoring</p>
+        </div>
+
+        <!-- Control Panel Tabs -->
+        <div class="cp-tabs">
+            <button class="cp-tab-btn active" data-tab="metrics">📊 Metrics</button>
+            <button class="cp-tab-btn" data-tab="status">🔄 Status</button>
+            <button class="cp-tab-btn" data-tab="logs">📋 Logs</button>
+            <button class="cp-tab-btn" data-tab="actions">⚙️ Actions</button>
+        </div>
+
+        <!-- Metrics Tab -->
+        <div id="metricsTab" class="cp-tab-content active">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">Total Matchmakers</div>
+                    <div class="metric-value" id="metricMatchmakers">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Unique Sections</div>
+                    <div class="metric-value" id="metricSections">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Unique Users</div>
+                    <div class="metric-value" id="metricUsersWithMatchmakers">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Avg Data Size</div>
+                    <div class="metric-value" id="metricAvgDataSize">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Most Active Section</div>
+                    <div class="metric-value" id="metricMostActiveSection">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Recent Changes (24h)</div>
+                    <div class="metric-value" id="metricRecentChanges">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Errors (24h)</div>
+                    <div class="metric-value error" id="metricErrors">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">API Calls (24h)</div>
+                    <div class="metric-value" id="metricApiCalls">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Tab -->
+        <div id="statusTab" class="cp-tab-content">
+            <div class="status-container">
+                <div class="status-box">
+                    <h4>Database Status</h4>
+                    <div class="status-info">
+                        <div class="status-item">
+                            <span class="status-label">Current Status:</span>
+                            <span class="status-badge" id="dbStatus">Idle</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Incoming Data:</span>
+                            <span class="status-badge" id="dbPauseStatus">Running</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Last Updated:</span>
+                            <span id="dbLastUpdated">-</span>
+                        </div>
+                        <div class="status-item" id="pauseReasonItem" style="display: none;">
+                            <span class="status-label">Pause Reason:</span>
+                            <span id="pauseReason">-</span>
+                        </div>
+                    </div>
+                    <div class="status-actions">
+                        <button class="btn btn-warning btn-sm" id="pauseDbBtn">Pause Data</button>
+                        <button class="btn btn-primary btn-sm" id="resumeDbBtn" style="display: none;">Resume Data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logs Tab -->
+        <div id="logsTab" class="cp-tab-content">
+            <div class="logs-container">
+                <div class="logs-section">
+                    <h4>Recent Changes</h4>
+                    <div id="recentChangesLog" class="log-list">
+                        <p class="log-loading">Loading recent changes...</p>
+                    </div>
+                </div>
+                <div class="logs-section">
+                    <h4>Recent Errors</h4>
+                    <div id="recentErrorsLog" class="log-list">
+                        <p class="log-loading">Loading error logs...</p>
+                    </div>
+                </div>
+                <div class="logs-section">
+                    <h4>Recent Fetches</h4>
+                    <div id="recentFetchesLog" class="log-list">
+                        <p class="log-loading">Loading fetch logs...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions Tab -->
+        <div id="actionsTab" class="cp-tab-content">
+            <div class="actions-container">
+                <div class="action-box">
+                    <h4>📥 Import Data</h4>
+                    <p>Import database data from a backup file</p>
+                    <input type="file" id="importFile" accept=".json" style="display: none;">
+                    <button class="btn btn-secondary btn-sm" onclick="document.getElementById('importFile').click()">Choose File</button>
+                    <button class="btn btn-primary btn-sm" id="importDataBtn" disabled>Import</button>
+                </div>
+                <div class="action-box">
+                    <h4>📤 Export Data</h4>
+                    <p>Export database statistics and metadata</p>
+                    <button class="btn btn-secondary btn-sm" id="exportDataBtn">Export Metadata</button>
+                </div>
+                <div class="action-box">
+                    <h4>📊 Generate Report</h4>
+                    <p>Generate a comprehensive database health report</p>
+                    <button class="btn btn-info btn-sm" id="generateReportBtn">Generate</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Refresh Button -->
+        <div class="cp-refresh">
+            <button class="btn btn-secondary btn-sm" id="refreshCpBtn">🔄 Refresh Data</button>
+            <span id="lastRefresh" class="refresh-time">Last updated: never</span>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table class="table table-striped" id="matchmakersTable">
         <thead>
             <tr>
                 <th>ID</th>
@@ -32,16 +891,15 @@
             {% for record in matchmakers_records %}
             <tr id="record-{{ record.id }}">
                 <td>{{ record.id }}</td>
-                <td>{{ record.user.name if record.user else "User " ~ record.user_id }}</td>
+                <td>{{ record.user.uid if record.user else "User " ~ record.user_id }}</td>
                 <td>{{ record.section }}</td>
-                <td class="data-cell">
-                    <div class="data-preview">{{ record.data|tojson(indent=2) }}</div>
-                </td>
+                <td>{{ record.data|tojson }}</td>
                 <td>{{ record.created_at.strftime('%Y-%m-%d %H:%M') if record.created_at else '' }}</td>
                 <td>{{ record.updated_at.strftime('%Y-%m-%d %H:%M') if record.updated_at else '' }}</td>
                 <td>
                     <button class="btn btn-info btn-sm view-btn" data-id="{{ record.id }}">View</button>
                     {% if current_user.role == 'Admin' %}
+                    <button class="btn btn-warning btn-sm edit-btn" data-id="{{ record.id }}">Edit</button>
                     <button class="btn btn-danger btn-sm delete-btn" data-id="{{ record.id }}">Delete</button>
                     {% endif %}
                 </td>
@@ -49,11 +907,7 @@
             {% endfor %}
         </tbody>
     </table>
-
-    <!-- Add New Record Button -->
-    {% if current_user.role == 'Admin' %}
-    <!-- <button class="btn btn-success" id="addRecordBtn">Add New Record</button> -->
-    {% endif %}
+    </div>
 </div>
 
 <!-- View/Edit Modal -->
@@ -62,13 +916,11 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="matchmakersModalLabel">Matchmakers Data Details</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
             </div>
             <div class="modal-body">
                 <form id="matchmakersForm">
                     <input type="hidden" id="recordId">
+                    <input type="hidden" id="formMode" value="view">
 
                     <div class="form-group">
                         <label for="recordUserId">User</label>
@@ -82,12 +934,13 @@
 
                     <div class="form-group">
                         <label for="recordData">Data (JSON)</label>
-                        <textarea class="form-control" id="recordData" rows="8" readonly></textarea>
+                        <textarea class="form-control" id="recordData" rows="10"></textarea>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary close-btn" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveBtn" style="display:none;">Save Changes</button>
             </div>
         </div>
     </div>
@@ -95,41 +948,604 @@
 
 {% endblock %}
 
-{% block scripts %}
+{% block background %}
 <script>
-    $(document).ready(function() {
-        // Handle view button
-        $(document).on('click', '.view-btn', function() {
-            const id = $(this).data('id');
-            const row = $(`#record-${id}`);
-            const user = row.find('td:nth-child(2)').text();
-            const section = row.find('td:nth-child(3)').text();
-            const data = row.find('.data-preview').text();
+    // Wait for jQuery to be ready
+    jQuery(document).ready(function($) {
+        console.log('=== MATCHMAKERS SCRIPT READY ===');
+        
+        // Test that jQuery works
+        console.log('jQuery version:', $.fn.jquery);
+        console.log('Number of view buttons found:', $('.view-btn').length);
+        console.log('Number of edit buttons found:', $('.edit-btn').length);
+        console.log('Number of delete buttons found:', $('.delete-btn').length);
 
-            $('#recordId').val(id);
-            $('#recordUserId').val(user);
-            $('#recordSection').val(section);
-            $('#recordData').val(data.replace('...', ''));
+        // Helper function to set form to readonly or editable
+        function setFormMode(mode) {
+            console.log('Setting form mode to:', mode);
+            const isReadOnly = mode === 'view';
+            $('#matchmakersForm input, #matchmakersForm textarea').prop('disabled', isReadOnly);
+            $('#saveBtn').toggle(!isReadOnly);
+            console.log('Form mode set');
+        }
 
-            // Make form read-only
-            $('#matchmakersForm input, #matchmakersForm select, #matchmakersForm textarea').prop('disabled', true);
-            $('#saveBtn').hide();
+        // Fetch record details and populate modal
+        async function loadRecordDetails(id) {
+            console.log('=== LOADING RECORD:', id, '===');
+            try {
+                const url = `/matchmakers/${id}`;
+                console.log('Fetching from:', url);
+                const response = await fetch(url);
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const record = await response.json();
+                console.log('Record received:', record);
+                
+                $('#recordId').val(record.id);
+                $('#recordUserId').val(record.user_uid || `User ${record.user_id}`);
+                $('#recordSection').val(record.section || '');
+                
+                // Format the data as JSON
+                let dataStr = record.data;
+                if (typeof dataStr === 'string') {
+                    try {
+                        const parsed = JSON.parse(dataStr);
+                        dataStr = JSON.stringify(parsed, null, 2);
+                    } catch (e) {
+                        console.log('Data is already a string, keeping as is');
+                    }
+                } else {
+                    dataStr = JSON.stringify(dataStr, null, 2);
+                }
+                $('#recordData').val(dataStr);
+                console.log('Form populated with data');
+                
+                return true;
+            } catch (error) {
+                console.error('ERROR loading record:', error);
+                alert('Error loading record details: ' + error.message);
+                return false;
+            }
+        }
+
+        // Handle View button
+        console.log('Attaching view button handler');
+        $(document).on('click', '.view-btn', async function(e) {
+            console.log('*** VIEW BUTTON CLICKED ***');
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const id = $(this).attr('data-id');
+            console.log('View button ID:', id);
+            
+            const success = await loadRecordDetails(id);
+            if (!success) {
+                console.log('Failed to load record');
+                return;
+            }
+            
+            setFormMode('view');
+            $('#recordUserId').prop('disabled', true);
+            $('#recordSection').prop('disabled', true);
             $('#matchmakersModalLabel').text('View Matchmakers Data');
-
+            console.log('About to show modal');
             $('#matchmakersModal').modal('show');
+            console.log('Modal shown');
         });
 
-        // Handle delete button (placeholder - would need API endpoint)
-        $(document).on('click', '.delete-btn', async function() {
-            const id = $(this).data('id');
-            if (confirm('Are you sure you want to delete this record?')) {
-                alert('Delete functionality not yet implemented');
+        // Handle Edit button
+        console.log('Attaching edit button handler');
+        $(document).on('click', '.edit-btn', async function(e) {
+            console.log('*** EDIT BUTTON CLICKED ***');
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const id = $(this).attr('data-id');
+            console.log('Edit button ID:', id);
+            
+            const success = await loadRecordDetails(id);
+            if (!success) {
+                console.log('Failed to load record');
+                return;
             }
+            
+            setFormMode('edit');
+            $('#recordUserId').prop('disabled', true);
+            $('#recordSection').prop('disabled', true);
+            $('#matchmakersModalLabel').text('Edit Matchmakers Data');
+            console.log('About to show modal');
+            $('#matchmakersModal').modal('show');
+            console.log('Modal shown');
+        });
+
+        // Handle Add New Record button
+        console.log('Attaching add record button handler');
+        $(document).on('click', '#addRecordBtn', function(e) {
+            console.log('*** ADD RECORD BUTTON CLICKED ***');
+            e.preventDefault();
+            e.stopPropagation();
+            
+            $('#matchmakersForm')[0].reset();
+            $('#recordId').val('');
+            $('#recordUserId').prop('disabled', false);
+            $('#recordSection').prop('disabled', false);
+            setFormMode('edit');
+            $('#matchmakersModalLabel').text('Add New Matchmakers Record');
+            $('#matchmakersModal').modal('show');
+            console.log('Modal shown for new record');
+        });
+
+        // Handle Save button
+        console.log('Attaching save button handler');
+        $(document).on('click', '#saveBtn', async function(e) {
+            console.log('*** SAVE BUTTON CLICKED ***');
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const recordId = $('#recordId').val();
+            const isNew = !recordId;
+            console.log('Is new record:', isNew);
+            
+            try {
+                // Parse and validate JSON
+                const dataStr = $('#recordData').val();
+                console.log('Raw data:', dataStr.substring(0, 100));
+                const parsedData = JSON.parse(dataStr);
+                console.log('Parsed data:', parsedData);
+                
+                let url, method, body;
+                if (isNew) {
+                    // Create new record
+                    const userIdText = $('#recordUserId').val();
+                    console.log('User ID text:', userIdText);
+                    const userId = userIdText.startsWith('User ') ? parseInt(userIdText.replace('User ', '')) : parseInt(userIdText);
+                    const section = $('#recordSection').val();
+                    console.log('Creating new record - userId:', userId, 'section:', section);
+                    
+                    if (!userId || !section) {
+                        alert('User ID and Section are required for new records');
+                        return;
+                    }
+                    
+                    url = '/matchmakers/create';
+                    method = 'POST';
+                    body = JSON.stringify({
+                        user_id: userId,
+                        section: section,
+                        data: parsedData
+                    });
+                } else {
+                    // Update existing
+                    url = `/matchmakers/update/${recordId}`;
+                    method = 'PUT';
+                    body = JSON.stringify({ data: parsedData });
+                }
+                
+                console.log('Request:', method, url);
+                console.log('Body:', body);
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin'
+                });
+                
+                console.log('Response status:', response.status);
+                const result = await response.json();
+                console.log('Response result:', result);
+                
+                if (response.ok) {
+                    alert(result.message || 'Record saved successfully.');
+                    $('#matchmakersModal').modal('hide');
+                    location.reload();
+                } else {
+                    alert(result.message || 'Error saving record.');
+                }
+            } catch (error) {
+                console.error('ERROR saving:', error);
+                if (error instanceof SyntaxError) {
+                    alert('Invalid JSON data: ' + error.message);
+                } else {
+                    alert('Error: ' + error.message);
+                }
+            }
+        });
+
+        // Handle Close button
+        $(document).on('click', '.close-btn', function(e) {
+            console.log('Close button clicked');
+            e.preventDefault();
+            e.stopPropagation();
+            $('#matchmakersModal').modal('hide');
+        });
+
+        // Handle delete button
+        console.log('Attaching delete button handler');
+        $(document).on('click', '.delete-btn', async function(e) {
+            console.log('*** DELETE BUTTON CLICKED ***');
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const id = $(this).attr('data-id');
+            console.log('Delete button ID:', id);
+            
+            if (!confirm('Are you sure you want to delete this record?')) {
+                console.log('Delete cancelled');
+                return;
+            }
+            
+            try {
+                const url = `/matchmakers/delete/${id}`;
+                console.log('Deleting:', url);
+                
+                const response = await fetch(url, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin'
+                });
+                
+                console.log('Delete response status:', response.status);
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert(result.message || 'Record deleted successfully.');
+                    location.reload();
+                } else {
+                    alert(result.message || 'Error deleting record.');
+                }
+            } catch (error) {
+                console.error('ERROR deleting:', error);
+                alert('Error: ' + error.message);
+            }
+        });
+        
+        console.log('=== ALL EVENT HANDLERS ATTACHED ===');
+
+        // ==================== CONTROL PANEL FUNCTIONALITY ====================
+        
+        // Tab switching
+        $('.cp-tab-btn').on('click', function() {
+            const tabName = $(this).attr('data-tab');
+            
+            // Hide all tabs
+            $('.cp-tab-content').removeClass('active');
+            $('.cp-tab-btn').removeClass('active');
+            
+            // Show selected tab
+            $('#' + tabName + 'Tab').addClass('active');
+            $(this).addClass('active');
+        });
+
+        // Load metrics data
+        async function loadMetrics() {
+            try {
+                // Get matchmakers data
+                const tableRows = $('#matchmakersTable tbody tr');
+                const totalMatchmakers = tableRows.length;
+                
+                // Collect unique sections
+                const sections = new Set();
+                const users = new Set();
+                let totalDataSize = 0;
+                
+                tableRows.each(function() {
+                    const cells = $(this).find('td');
+                    if (cells.length >= 3) {
+                        const userId = cells.eq(1).text().trim();
+                        const section = cells.eq(2).text().trim();
+                        const data = cells.eq(3).text().trim();
+                        
+                        users.add(userId);
+                        sections.add(section);
+                        
+                        // Rough estimate of data size
+                        if (data) {
+                            totalDataSize += data.length;
+                        }
+                    }
+                });
+                
+                // Calculate average data size
+                const avgDataSize = totalMatchmakers > 0 ? Math.round(totalDataSize / totalMatchmakers / 1024 * 100) / 100 : 0;
+                
+                // Find most active section
+                const sectionCounts = {};
+                tableRows.each(function() {
+                    const section = $(this).find('td').eq(2).text().trim();
+                    sectionCounts[section] = (sectionCounts[section] || 0) + 1;
+                });
+                
+                let mostActiveSection = 'N/A';
+                let maxCount = 0;
+                for (const [section, count] of Object.entries(sectionCounts)) {
+                    if (count > maxCount) {
+                        maxCount = count;
+                        mostActiveSection = section;
+                    }
+                }
+                
+                // Get API stats from server
+                try {
+                    const response = await fetch('/api/control-panel/metrics');
+                    const data = await response.json();
+                    
+                    $('#metricMatchmakers').text(totalMatchmakers);
+                    $('#metricSections').text(sections.size);
+                    $('#metricUsersWithMatchmakers').text(users.size);
+                    $('#metricAvgDataSize').text(avgDataSize + ' KB');
+                    $('#metricMostActiveSection').text(mostActiveSection);
+                    $('#metricRecentChanges').text(data.data?.errors_last_24h || 0);
+                    $('#metricErrors').text(data.data?.errors_last_24h || 0);
+                    $('#metricApiCalls').text(data.data?.fetches_last_24h || 0);
+                } catch (e) {
+                    // Fallback if API not available
+                    $('#metricMatchmakers').text(totalMatchmakers);
+                    $('#metricSections').text(sections.size);
+                    $('#metricUsersWithMatchmakers').text(users.size);
+                    $('#metricAvgDataSize').text(avgDataSize + ' KB');
+                    $('#metricMostActiveSection').text(mostActiveSection);
+                }
+            } catch (error) {
+                console.error('Error loading metrics:', error);
+            }
+        }
+
+        // Load database status
+        async function loadDatabaseStatus() {
+            try {
+                const response = await fetch('/api/control-panel/database-status');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const status = data.data;
+                    $('#dbStatus').text(status.status.toUpperCase());
+                    $('#dbLastUpdated').text(new Date(status.last_updated).toLocaleString());
+                    
+                    if (status.is_paused) {
+                        $('#dbPauseStatus').text('PAUSED').addClass('paused');
+                        $('#pauseReasonItem').show();
+                        $('#pauseReason').text(status.pause_reason || 'Unknown');
+                        $('#pauseDbBtn').hide();
+                        $('#resumeDbBtn').show();
+                    } else {
+                        $('#dbPauseStatus').text('RUNNING').removeClass('paused');
+                        $('#pauseReasonItem').hide();
+                        $('#pauseDbBtn').show();
+                        $('#resumeDbBtn').hide();
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading database status:', error);
+            }
+        }
+
+        // Load recent changes
+        async function loadRecentChanges() {
+            try {
+                const response = await fetch('/api/control-panel/change-logs?limit=10');
+                const data = await response.json();
+                
+                if (data.success && data.data.length > 0) {
+                    let html = '';
+                    data.data.forEach(change => {
+                        const time = new Date(change.timestamp).toLocaleTimeString();
+                        html += `
+                            <div class="log-item">
+                                <span class="log-time">${time}</span>
+                                <span class="log-message">${change.action.toUpperCase()} - ${change.entity_type} #${change.entity_id}</span>
+                            </div>
+                        `;
+                    });
+                    $('#recentChangesLog').html(html);
+                } else {
+                    $('#recentChangesLog').html('<p class="log-loading">No changes in the last 24 hours</p>');
+                }
+            } catch (error) {
+                console.error('Error loading changes:', error);
+                $('#recentChangesLog').html('<p class="log-loading">Error loading changes</p>');
+            }
+        }
+
+        // Load recent errors
+        async function loadRecentErrors() {
+            try {
+                const response = await fetch('/api/control-panel/error-logs?limit=10');
+                const data = await response.json();
+                
+                if (data.success && data.data.length > 0) {
+                    let html = '';
+                    data.data.forEach(error => {
+                        const time = new Date(error.timestamp).toLocaleTimeString();
+                        html += `
+                            <div class="log-item error">
+                                <span class="log-time">${time}</span>
+                                <span class="log-message"><strong>${error.error_type}</strong> - ${error.endpoint}</span>
+                                <small>${error.error_message.substring(0, 100)}...</small>
+                            </div>
+                        `;
+                    });
+                    $('#recentErrorsLog').html(html);
+                } else {
+                    $('#recentErrorsLog').html('<p class="log-loading">No errors in the last 24 hours</p>');
+                }
+            } catch (error) {
+                console.error('Error loading errors:', error);
+                $('#recentErrorsLog').html('<p class="log-loading">Error loading error logs</p>');
+            }
+        }
+
+        // Load recent fetches
+        async function loadRecentFetches() {
+            try {
+                const response = await fetch('/api/control-panel/fetch-logs?limit=10');
+                const data = await response.json();
+                
+                if (data.success && data.data.length > 0) {
+                    let html = '';
+                    data.data.forEach(fetch_log => {
+                        const time = new Date(fetch_log.timestamp).toLocaleTimeString();
+                        const isError = fetch_log.is_error ? 'error' : '';
+                        html += `
+                            <div class="log-item ${isError}">
+                                <span class="log-time">${time}</span>
+                                <span class="log-message"><strong>${fetch_log.method}</strong> ${fetch_log.endpoint}</span>
+                                <small>Status: ${fetch_log.status_code} | Response: ${fetch_log.response_time_ms}ms</small>
+                            </div>
+                        `;
+                    });
+                    $('#recentFetchesLog').html(html);
+                } else {
+                    $('#recentFetchesLog').html('<p class="log-loading">No fetches in the last 24 hours</p>');
+                }
+            } catch (error) {
+                console.error('Error loading fetches:', error);
+                $('#recentFetchesLog').html('<p class="log-loading">Error loading fetch logs</p>');
+            }
+        }
+
+        // Refresh all control panel data
+        async function refreshControlPanelData() {
+            console.log('Refreshing control panel data...');
+            await Promise.all([
+                loadMetrics(),
+                loadDatabaseStatus(),
+                loadRecentChanges(),
+                loadRecentErrors(),
+                loadRecentFetches()
+            ]);
+            
+            const now = new Date();
+            $('#lastRefresh').text('Last updated: ' + now.toLocaleTimeString());
+        }
+
+        // Pause database button
+        $('#pauseDbBtn').on('click', async function() {
+            const reason = prompt('Enter pause reason (optional):', 'Manual pause via control panel');
+            if (reason !== null) {
+                try {
+                    const response = await fetch('/api/control-panel/database-status/pause', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ reason: reason || 'Manual pause' }),
+                        credentials: 'same-origin'
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        alert('Database paused successfully');
+                        await loadDatabaseStatus();
+                    } else {
+                        alert('Error pausing database: ' + data.error);
+                    }
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                }
+            }
+        });
+
+        // Resume database button
+        $('#resumeDbBtn').on('click', async function() {
+            if (confirm('Resume incoming data to the database?')) {
+                try {
+                    const response = await fetch('/api/control-panel/database-status/resume', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'same-origin'
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        alert('Database resumed successfully');
+                        await loadDatabaseStatus();
+                    } else {
+                        alert('Error resuming database: ' + data.error);
+                    }
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                }
+            }
+        });
+
+        // Export data button
+        $('#exportDataBtn').on('click', async function() {
+            try {
+                const response = await fetch('/api/control-panel/export/data');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const jsonString = JSON.stringify(data.preview, null, 2);
+                    const blob = new Blob([jsonString], { type: 'application/json' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'database-export-' + new Date().toISOString() + '.json';
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    alert('Export download started');
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+
+        // Refresh button
+        $('#refreshCpBtn').on('click', function() {
+            $(this).prop('disabled', true);
+            refreshControlPanelData().then(() => {
+                $(this).prop('disabled', false);
+            });
+        });
+
+        // Generate report button
+        $('#generateReportBtn').on('click', async function() {
+            try {
+                const response = await fetch('/api/control-panel/summary');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const report = data.data;
+                    const reportText = `
+DATABASE HEALTH REPORT
+Generated: ${new Date().toISOString()}
+
+METRICS:
+- Total Users: ${report.metrics.total_users}
+- Active Users: ${report.metrics.active_users}
+- Total Records: ${report.metrics.total_records}
+- Total Posts: ${report.metrics.total_posts}
+- Total Personas: ${report.metrics.total_personas}
+- Total Matchmakers: ${report.metrics.total_matchmakers}
+- Errors (24h): ${report.errors_last_24h}
+- Fetches (24h): ${report.fetches_last_24h}
+
+DATABASE STATUS:
+- Status: ${report.status.status}
+- Paused: ${report.status.is_paused}
+- Last Updated: ${report.status.last_updated}
+
+RECENT ACTIVITY:
+Recent Changes: ${report.recent_changes.length}
+Recent Errors: ${report.recent_errors.length}
+                    `;
+                    
+                    alert(reportText);
+                }
+            } catch (error) {
+                alert('Error generating report: ' + error.message);
+            }
+        });
+
+        // Initial load when page loads
+        $(document).ready(function() {
+            // Load control panel data immediately on page load
+            refreshControlPanelData();
         });
     });
 </script>
-
-{% endblock %}
-
-{% block background %}
 {% endblock %}
