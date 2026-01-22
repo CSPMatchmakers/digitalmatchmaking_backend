@@ -32,6 +32,7 @@ from api.post import post_api  # Import the social media post API
 from api.test import test_api
 from api.matchmaking_saftey import matchmaking_api
 from api.pii import pii_api
+from api.control_panel_api import control_panel_api  # Import the control panel API
 #from api.announcement import announcement_api ##temporary revert
 
 # database Initialization functions
@@ -79,6 +80,7 @@ app.register_blueprint(groq_api)
 app.register_blueprint(gemini_api)
 app.register_blueprint(microblog_api)
 app.register_blueprint(matchmaking_api)
+app.register_blueprint(control_panel_api)  # Register the control panel API
 
 app.register_blueprint(analytics_api)
 app.register_blueprint(student_api)
@@ -171,12 +173,6 @@ def sections():
 def persona():
     personas = Persona.query.all()
     return render_template("persona.html", personas=personas)
-
-@app.route('/matchmakers/')
-@login_required
-def matchmakers():
-    matchmakers_records = MatchmakersData.query.all()
-    return render_template("matchmakers.html", matchmakers_records=matchmakers_records)
 
 # Helper function to extract uploads for a user (ie PFP image)
 @app.route('/uploads/<path:filename>')
