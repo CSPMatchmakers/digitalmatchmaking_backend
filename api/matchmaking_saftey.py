@@ -9,15 +9,30 @@ from __init__ import app
 from api.jwt_authorize import token_required
 from model.user import User
 from model.matchmakers import MatchmakersData
+from model.database_audit import DatabaseStatus
 from model.github import GitHubUser
 import os
 import json
+from functools import wraps
 
 matchmaking_api = Blueprint('matchmaking_api', __name__,
                    url_prefix='/api/match')
 
 # API docs https://flask-restful.readthedocs.io/en/latest/api.html
 api = Api(matchmaking_api)
+
+
+def matchmakers_write_allowed():
+    """Decorator to check if matchmakers data writes are allowed"""
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            status = DatabaseStatus.get_or_create()
+            if status.is_matchmakers_paused:
+                return {'message': f'Matchmakers data is currently paused. Reason: {status.matchmakers_pause_reason}'}, 403
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
 
 
 class MatchmakingAPI:
@@ -54,6 +69,7 @@ class MatchmakingAPI:
 
     class _WRITE(Resource):
         @token_required()
+        @matchmakers_write_allowed()
         def post(self):
             """Write or update matchmakers data for a specific section.
             
@@ -103,6 +119,7 @@ class MatchmakingAPI:
 
     class _SETUP(Resource):
         @token_required()
+        @matchmakers_write_allowed()
         def post(self):
             """Initialize profile setup for the current user.
             
@@ -133,6 +150,7 @@ class MatchmakingAPI:
 
     class _ADD(Resource):
         @token_required()
+        @matchmakers_write_allowed()
         def post(self):
             """Add custom indexed data to the user's profile.
             
@@ -184,6 +202,7 @@ class MatchmakingAPI:
                 return {'message': f'Error adding data: {str(e)}'}, 500
 
         @token_required()
+        @matchmakers_write_allowed()
         def delete(self):
             """Delete data by index from the user's profile.
             

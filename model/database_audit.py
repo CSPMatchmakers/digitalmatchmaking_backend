@@ -151,6 +151,8 @@ class DatabaseStatus(db.Model):
     last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     is_paused = db.Column(db.Boolean, default=False)  # Is incoming data paused?
     pause_reason = db.Column(db.String(255))
+    is_matchmakers_paused = db.Column(db.Boolean, default=False)  # Is matchmakers data paused?
+    matchmakers_pause_reason = db.Column(db.String(255))
     
     def to_dict(self):
         details_obj = {}
@@ -167,6 +169,8 @@ class DatabaseStatus(db.Model):
             'last_updated': self.last_updated.isoformat(),
             'is_paused': self.is_paused,
             'pause_reason': self.pause_reason,
+            'is_matchmakers_paused': self.is_matchmakers_paused,
+            'matchmakers_pause_reason': self.matchmakers_pause_reason,
         }
     
     @staticmethod
@@ -208,6 +212,26 @@ class DatabaseStatus(db.Model):
         status.is_paused = False
         status.pause_reason = None
         status.status = 'idle'
+        status.last_updated = datetime.utcnow()
+        db.session.commit()
+        return status
+    
+    @staticmethod
+    def pause_matchmakers_data(reason="User initiated matchmakers pause"):
+        """Pause incoming matchmakers data"""
+        status = DatabaseStatus.get_or_create()
+        status.is_matchmakers_paused = True
+        status.matchmakers_pause_reason = reason
+        status.last_updated = datetime.utcnow()
+        db.session.commit()
+        return status
+    
+    @staticmethod
+    def resume_matchmakers_data():
+        """Resume incoming matchmakers data"""
+        status = DatabaseStatus.get_or_create()
+        status.is_matchmakers_paused = False
+        status.matchmakers_pause_reason = None
         status.last_updated = datetime.utcnow()
         db.session.commit()
         return status

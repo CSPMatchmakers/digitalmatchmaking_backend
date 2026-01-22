@@ -247,14 +247,16 @@ def get_database_status():
 @login_required
 @admin_required
 def pause_database():
-    """Pause incoming data to the database"""
+    """Pause incoming data to the database (including matchmakers)"""
     try:
         reason = request.get_json().get('reason', 'User initiated pause')
         status = DatabaseStatus.pause_incoming_data(reason)
+        # Also pause matchmakers data
+        DatabaseStatus.pause_matchmakers_data(reason)
         
         return jsonify({
             'success': True,
-            'message': 'Database paused',
+            'message': 'Database paused (including matchmakers)',
             'data': status.to_dict()
         }), 200
     except Exception as e:
@@ -265,13 +267,50 @@ def pause_database():
 @login_required
 @admin_required
 def resume_database():
-    """Resume incoming data to the database"""
+    """Resume incoming data to the database (including matchmakers)"""
     try:
         status = DatabaseStatus.resume_incoming_data()
+        # Also resume matchmakers data
+        DatabaseStatus.resume_matchmakers_data()
         
         return jsonify({
             'success': True,
-            'message': 'Database resumed',
+            'message': 'Database resumed (including matchmakers)',
+            'data': status.to_dict()
+        }), 200
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@control_panel_api.route('/database-status/pause-matchmakers', methods=['POST'])
+@login_required
+@admin_required
+def pause_matchmakers():
+    """Pause incoming matchmakers data only"""
+    try:
+        reason = request.get_json().get('reason', 'User initiated matchmakers pause')
+        status = DatabaseStatus.pause_matchmakers_data(reason)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Matchmakers data paused',
+            'data': status.to_dict()
+        }), 200
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@control_panel_api.route('/database-status/resume-matchmakers', methods=['POST'])
+@login_required
+@admin_required
+def resume_matchmakers():
+    """Resume incoming matchmakers data only"""
+    try:
+        status = DatabaseStatus.resume_matchmakers_data()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Matchmakers data resumed',
             'data': status.to_dict()
         }), 200
     except Exception as e:
