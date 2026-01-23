@@ -203,8 +203,14 @@ class MatchmakersData(db.Model):
     
     def update(self, data):
         """Update existing PII data."""
+        from sqlalchemy.orm.attributes import flag_modified
+        
         self.data = data
         self.updated_at = datetime.now(timezone.utc)
+        
+        # Mark the JSON column as modified so SQLAlchemy knows to update it
+        flag_modified(self, 'data')
+        
         db.session.commit()
         return self
     
