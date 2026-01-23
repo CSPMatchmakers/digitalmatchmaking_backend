@@ -288,7 +288,7 @@ class MatchmakingAPI:
     class _SAVE_PROFILE_JSON(Resource):
         @token_required()
         def post(self):
-            """Save frontend quiz/profile data to the JSON file"""
+            """Save frontend quiz/profile data to the database"""
             current_user = g.current_user
             uid = current_user.uid
 
@@ -301,49 +301,52 @@ class MatchmakingAPI:
             try:
                 # Use MatchmakersData (DB) to store profile quiz under section 'profile'
                 profile_records = MatchmakersData.get_user_matchmakers_data(current_user.id, section='profile')
+                
+                print(f"DEBUG: Found {len(profile_records)} existing profile records for user {uid}")
+                print(f"DEBUG: User ID: {current_user.id}")
 
                 if not profile_records:
-                    # create a new profile record
-                    profile_record = MatchmakersData(current_user, 'profile', {})
-                    profile_record.create()
+                    # create a new profile record with the quiz data
+                    print(f"DEBUG: Creating new profile record for user {uid}")
+                    new_data = {'profile_quiz': profile_data}
+                    profile_record = MatchmakersData(current_user, 'profile', new_data)
+                    
+                    try:
+                        profile_record.create()
+                        print(f"DEBUG: Successfully created profile record")
+                    except Exception as create_error:
+                        print(f"DEBUG: Error in create(): {str(create_error)}")
+                        raise
                 else:
+                    # Update existing record
+                    print(f"DEBUG: Updating existing profile record for user {uid}")
                     profile_record = profile_records[0]
+                    # PRESERVE existing data and add/update quiz responses
+                    current_data = profile_record.data if profile_record.data else {}
+                    print(f"DEBUG: Current data before update: {current_data}")
+                    current_data['profile_quiz'] = profile_data
+                    profile_record.update(current_data)
+                    print(f"DEBUG: Data after update: {profile_record.data}")
 
-                # Ensure data is a dict
-                current_data = profile_record.data if profile_record.data else {}
-                current_data['profile_quiz'] = profile_data
-
-                # Update the DB record
-                profile_record.update(current_data)
-
-                return {'message': f'Profile data saved for {uid}', 'setup': profile_record.data}, 201
-            except Exception as e:
-                return {'message': f'Error saving profile data: {str(e)}'}, 500
-
-        @token_required()
-        def get(self):
-            """Retrieve the user's profile quiz data"""
-            current_user = g.current_user
-            uid = current_user.uid
-
-            try:
-                profile_records = MatchmakersData.get_user_matchmakers_data(current_user.id, section='profile')
-                if not profile_records:
-                    return {'message': f'No profile data found for {uid}'}, 404
-
-                profile_record = profile_records[0]
-                current_data = profile_record.data if profile_record.data else {}
-
-                if 'profile_quiz' not in current_data:
-                    return {'message': f'No profile data found for {uid}'}, 404
+                # Verify the save
+                verification = MatchmakersData.get_user_matchmakers_data(current_user.id, section='profile')
+                print(f"DEBUG: Verification - found {len(verification)} profile records after save")
+                if verification:
+                    print(f"DEBUG: Verification - data content: {verification[0].data}")
 
                 return {
-                    'message': f'Profile data for {uid}',
-                    'profile_data': current_data['profile_quiz']
-                }, 200
+                    'message': f'Profile data saved for {uid}', 
+                    'data': profile_record.data
+                }, 201
+                
+            except ValueError as ve:
+                print(f"DEBUG: ValueError: {str(ve)}")
+                return {'message': f'Value error: {str(ve)}'}, 400
             except Exception as e:
-                return {'message': f'Error retrieving profile data: {str(e)}'}, 500
-
+                print(f"DEBUG: Exception: {str(e)}")
+                import traceback
+                traceback.print_exc()
+                return {'message': f'Error saving profile data: {str(e)}'}, 500
 
     # Register all resources
     api.add_resource(_DATA, '/data')
