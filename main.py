@@ -31,7 +31,7 @@ from api.classroom_api import classroom_api
 from hacks.joke import joke_api  # Import the joke API blueprint
 from api.post import post_api  # Import the social media post API
 from api.test import test_api
-from api.matchmaking_saftey import matchmaking_api
+from api.matchmaking_api import matchmaking_bio_api as matchmaking_api
 # from api.pii import pii_api
 from api.control_panel_api import control_panel_api  # Import the control panel API
 #from api.announcement import announcement_api ##temporary revert
