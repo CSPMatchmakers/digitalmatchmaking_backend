@@ -31,6 +31,7 @@ from api.classroom_api import classroom_api
 from hacks.joke import joke_api  # Import the joke API blueprint
 from api.post import post_api  # Import the social media post API
 from api.test import test_api
+from api.groq_bio_api import groq_bio_api
 from api.matchmaking_api import matchmaking_bio_api as matchmaking_api
 # from api.pii import pii_api
 from api.control_panel_api import control_panel_api  # Import the control panel API
@@ -82,6 +83,7 @@ app.register_blueprint(anthropic_api)
 app.register_blueprint(microblog_api)
 app.register_blueprint(matchmaking_api)
 app.register_blueprint(control_panel_api)  # Register the control panel API
+app.register_blueprint(groq_bio_api)
 
 app.register_blueprint(analytics_api)
 app.register_blueprint(student_api)
