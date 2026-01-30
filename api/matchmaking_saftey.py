@@ -287,6 +287,49 @@ class MatchmakingAPI:
     
     class _SAVE_PROFILE_JSON(Resource):
         @token_required()
+        def get(self):
+            """Get user's profile quiz data from the database"""
+            current_user = g.current_user
+            uid = current_user.uid
+
+            try:
+                # Get user's profile record
+                profile_records = MatchmakersData.get_user_matchmakers_data(current_user.id, section='profile')
+                
+                print(f"DEBUG GET: Found {len(profile_records)} profile records for user {uid}")
+                
+                if not profile_records:
+                    return {
+                        'message': f'No profile data found for {uid}',
+                        'profile_quiz': None
+                    }, 404
+                
+                profile_record = profile_records[0]
+                current_data = profile_record.data if profile_record.data else {}
+                
+                print(f"DEBUG GET: Profile data: {current_data}")
+                
+                # Extract just the profile_quiz if it exists
+                profile_quiz = current_data.get('profile_quiz', None)
+                
+                if not profile_quiz:
+                    return {
+                        'message': f'No profile quiz data found for {uid}',
+                        'profile_quiz': None
+                    }, 404
+                
+                return {
+                    'message': f'Profile data retrieved for {uid}',
+                    'profile_quiz': profile_quiz
+                }, 200
+                
+            except Exception as e:
+                print(f"DEBUG GET: Exception: {str(e)}")
+                import traceback
+                traceback.print_exc()
+                return {'message': f'Error retrieving profile data: {str(e)}'}, 500
+
+        @token_required()
         def post(self):
             """Save frontend quiz/profile data to the database"""
             current_user = g.current_user
@@ -347,7 +390,7 @@ class MatchmakingAPI:
                 import traceback
                 traceback.print_exc()
                 return {'message': f'Error saving profile data: {str(e)}'}, 500
-
+            
     # Register all resources
     api.add_resource(_DATA, '/data')
     api.add_resource(_WRITE, '/data-write')
