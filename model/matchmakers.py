@@ -246,6 +246,111 @@ def initMatchmakersData():
     with app.app_context():
         # Create database tables
         db.create_all()
-        
-        # Sample matchmakers data can be added here if needed
-        print("MatchmakersData table initialized")
+
+        # Build staged matchmakers data linked to persona-created users
+        from model.persona import UserPersona
+
+        target_count = 25
+
+        # Find users who already have personas assigned
+        persona_user_ids = {up.user_id for up in UserPersona.query.all()}
+        persona_users = []
+        if persona_user_ids:
+            persona_users = User.query.filter(User.id.in_(persona_user_ids)).all()
+
+        users = list(persona_users)
+
+        # If fewer than target, fill with other existing users
+        if len(users) < target_count:
+            remaining = target_count - len(users)
+            if persona_user_ids:
+                extra_users = User.query.filter(~User.id.in_(persona_user_ids)).limit(remaining).all()
+            else:
+                extra_users = User.query.limit(remaining).all()
+            for u in extra_users:
+                if u not in users:
+                    users.append(u)
+
+        users = users[:target_count]
+
+        colors = ["Blue", "Green", "Red", "Purple", "Yellow", "Orange", "Teal", "Pink", "Indigo", "Gray"]
+        animals = ["Birds", "Cats", "Dogs", "Dolphins", "Foxes", "Wolves", "Owls", "Turtles", "Horses", "Otters"]
+        genres = ["Pop", "Rock", "Hip Hop", "Jazz", "Classical", "EDM", "Indie", "R&B", "Country", "Lo-fi"]
+        artists = ["Michael Jackson", "Taylor Swift", "Adele", "Drake", "Coldplay", "BTS", "Billie Eilish", "Bruno Mars", "The Weeknd", "Daft Punk"]
+        subjects = ["English", "Math", "Science", "History", "Computer Science", "Art", "Music", "PE", "Economics", "Biology"]
+
+        professions = ["entrepreneur", "student", "designer", "developer", "researcher", "writer", "artist", "mentor", "builder", "analyst"]
+        about_hobbies_1 = ["building things", "reading", "coding", "sketching", "music", "sports", "robotics", "gaming", "cooking", "traveling"]
+        about_hobbies_2 = ["trying new experiences", "learning languages", "making videos", "designing apps", "volunteering", "photography", "debate", "hiking", "drawing", "tinkering"]
+        activities = ["exploring new ideas", "working on projects", "collaborating", "brainstorming", "helping others", "testing prototypes", "researching", "planning", "iterating", "presenting"]
+        values = ["making an impact", "creativity", "growth", "teamwork", "curiosity", "excellence", "community", "balance", "innovation", "integrity"]
+
+        interest_h1 = ["drawing", "cycling", "playing board games", "baking", "filmmaking", "coding", "reading", "sports", "music", "3D printing"]
+        interest_h2 = ["photography", "skateboarding", "puzzles", "writing", "gardening", "design", "volunteering", "gaming", "yoga", "robotics"]
+        interest_h3 = ["chess", "running", "painting", "blogging", "travel", "swimming", "crafts", "podcasts", "DIY", "science fairs"]
+        topics = ["philosophy", "technology", "psychology", "history", "entrepreneurship", "science", "music", "design", "sports", "nature"]
+
+        skill1 = ["project management", "leadership", "time management", "public speaking", "problem solving", "team coordination", "analysis", "writing", "debugging", "design"]
+        skill2 = ["communication", "creativity", "organization", "research", "collaboration", "testing", "mentoring", "data literacy", "UI/UX", "strategy"]
+        skill3 = ["adaptability", "empathy", "focus", "planning", "prototyping", "iteration", "documentation", "presentation", "modeling", "optimization"]
+        experience = ["1-2 years", "2-3 years", "3-4 years", "4-5 years", "5+ years"]
+        aspects = ["learning new techniques", "leading teams", "building prototypes", "sharing ideas", "experimenting", "mentoring others", "iterating quickly", "solving puzzles", "shipping features", "reflecting on outcomes"]
+
+        goal_interests = ["web development", "app development", "robotics", "data science", "game design", "AI", "cybersecurity", "product design", "music production", "entrepreneurship"]
+        goals = ["collaborate on open-source projects", "build a portfolio", "launch a side project", "teach others", "win a hackathon", "publish research", "start a club", "create a startup", "improve skills", "ship an app"]
+        goal_activities = ["work on coding projects together", "pair program regularly", "share ideas", "review designs", "prototype quickly", "study together", "test products", "practice presentations", "brainstorm features", "co-write docs"]
+
+        for idx, user in enumerate(users):
+            existing = MatchmakersData.query.filter_by(user_id=user.id, section='profile').first()
+            if existing:
+                continue
+
+            profile_data = {
+                "profile_quiz": {
+                    "What is your favorite color?": colors[idx % len(colors)],
+                    "What do you want your username to be?": user.uid,
+                    "What's your favorite animal?": animals[idx % len(animals)],
+                    "What is your favorite genre of music?": genres[idx % len(genres)],
+                    "What is your favorite band/musical artist?": artists[idx % len(artists)],
+                    "What is your favorite subject?": subjects[idx % len(subjects)]
+                },
+                "personality_quiz_responses": "Personality Type Analyzed",
+                "bio": {
+                    "about": {
+                        "profession": professions[idx % len(professions)],
+                        "hobby1": about_hobbies_1[idx % len(about_hobbies_1)],
+                        "hobby2": about_hobbies_2[idx % len(about_hobbies_2)],
+                        "activity": activities[idx % len(activities)],
+                        "value": values[idx % len(values)]
+                    },
+                    "interests": {
+                        "hobby1": interest_h1[idx % len(interest_h1)],
+                        "hobby2": interest_h2[idx % len(interest_h2)],
+                        "hobby3": interest_h3[idx % len(interest_h3)],
+                        "topic": topics[idx % len(topics)]
+                    },
+                    "skills": {
+                        "skill1": skill1[idx % len(skill1)],
+                        "skill2": skill2[idx % len(skill2)],
+                        "skill3": skill3[idx % len(skill3)],
+                        "experience": experience[idx % len(experience)],
+                        "aspect": aspects[idx % len(aspects)]
+                    },
+                    "goals": {
+                        "interest": goal_interests[idx % len(goal_interests)],
+                        "goal": goals[idx % len(goals)],
+                        "activity": goal_activities[idx % len(goal_activities)]
+                    },
+                    "last_updated": datetime.now(timezone.utc).isoformat(),
+                    "safety_checked": True,
+                    "ai_verified": True
+                }
+            }
+
+            record = MatchmakersData(user=user, section='profile', data=profile_data)
+            try:
+                record.create()
+            except ValueError:
+                continue
+
+        print(f"MatchmakersData table initialized with {len(users)} profile records")
