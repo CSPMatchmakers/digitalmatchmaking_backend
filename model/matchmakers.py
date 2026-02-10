@@ -305,16 +305,65 @@ def initMatchmakersData():
             if existing:
                 continue
 
+            # MBTI personality types for personality_quiz
+            mbti_types = ["E_high", "E_moderate", "I_high", "I_moderate"]
+            mbti_feeling = ["F_high", "F_moderate", "T_high", "T_moderate"]
+            mbti_perception = ["J_high", "J_moderate", "P_high", "P_moderate"]
+            mbti_sensing = ["S_high", "S_moderate", "N_high", "N_moderate"]
+            
+            personality_traits = ["Extroverted", "Introverted"]
+            decision_traits = ["Empathetic", "Logical"]
+            lifestyle_traits = ["Structured", "Spontaneous"]
+
             profile_data = {
                 "profile_quiz": {
-                    "What is your favorite color?": colors[idx % len(colors)],
-                    "What do you want your username to be?": user.uid,
-                    "What's your favorite animal?": animals[idx % len(animals)],
-                    "What is your favorite genre of music?": genres[idx % len(genres)],
-                    "What is your favorite band/musical artist?": artists[idx % len(artists)],
-                    "What is your favorite subject?": subjects[idx % len(subjects)]
+                    "personality_quiz": {
+                        "1": mbti_types[idx % len(mbti_types)],
+                        "2": mbti_feeling[idx % len(mbti_feeling)],
+                        "3": mbti_perception[idx % len(mbti_perception)],
+                        "4": mbti_sensing[idx % len(mbti_sensing)],
+                        "5": mbti_sensing[(idx + 1) % len(mbti_sensing)],
+                        "6": mbti_types[(idx + 1) % len(mbti_types)],
+                        "7": mbti_feeling[(idx + 1) % len(mbti_feeling)],
+                        "8": mbti_sensing[(idx + 2) % len(mbti_sensing)],
+                        "9": mbti_sensing[(idx + 3) % len(mbti_sensing)],
+                        "10": mbti_sensing[(idx + 4) % len(mbti_sensing)],
+                        "11": mbti_feeling[(idx + 2) % len(mbti_feeling)],
+                        "12": mbti_feeling[(idx + 3) % len(mbti_feeling)],
+                        "13": mbti_feeling[(idx + 4) % len(mbti_feeling)]
+                    },
+                    "analysis": {
+                        "focus": ["communication", "problem solving", "creativity", "leadership", "analysis"][idx % 5],
+                        "depth": ["shallow", "moderate", "deep"][idx % 3],
+                        "personalityTraits": {
+                            "social": personality_traits[idx % len(personality_traits)],
+                            "decision": decision_traits[idx % len(decision_traits)],
+                            "lifestyle": lifestyle_traits[idx % len(lifestyle_traits)],
+                            "socialScore": 0,
+                            "introversionScore": 0,
+                            "thinkingScore": 0,
+                            "feelingScore": 0
+                        },
+                        "profileInsights": [
+                            {
+                                "category": "Color Preference",
+                                "value": colors[idx % len(colors)]
+                            },
+                            {
+                                "category": "Animal Preference",
+                                "value": animals[idx % len(animals)]
+                            },
+                            {
+                                "category": "Music Taste",
+                                "value": genres[idx % len(genres)]
+                            },
+                            {
+                                "category": "Academic Interest",
+                                "value": subjects[idx % len(subjects)]
+                            }
+                        ]
+                    }
                 },
-                "personality_quiz_responses": "Personality Type Analyzed",
                 "bio": {
                     "about": {
                         "profession": professions[idx % len(professions)],
@@ -344,7 +393,8 @@ def initMatchmakersData():
                     "last_updated": datetime.now(timezone.utc).isoformat(),
                     "safety_checked": True,
                     "ai_verified": True
-                }
+                },
+                "matched_with": []
             }
 
             record = MatchmakersData(user=user, section='profile', data=profile_data)
@@ -353,4 +403,5 @@ def initMatchmakersData():
             except ValueError:
                 continue
 
-        print(f"MatchmakersData table initialized with {len(users)} profile records")
+        print(f"  > MatchmakersData table initialized with {len(users)} profile records")
+        print("  > initMatchmakersData() completed successfully!")
