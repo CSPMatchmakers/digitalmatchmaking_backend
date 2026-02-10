@@ -673,7 +673,7 @@ def initUsers():
             'last_updated': None
         }
 
-        u1 = User(name=app.config['ADMIN_USER'], uid=app.config['ADMIN_UID'], password=app.config['ADMIN_PASSWORD'], pfp=app.config['ADMIN_PFP'], kasm_server_needed=True, role="Admin")
+        u1 = User(name=app.config['ADMIN_USER'], uid=app.config['ADMIN_UID'], password=app.config['ADMIN_PASSWORD'], pfp=app.config['ADMIN_PFP'], kasm_server_needed=False, role="Admin")
         u2 = User(name=app.config['DEFAULT_USER'], uid=app.config['DEFAULT_UID'], password=app.config['DEFAULT_USER_PASSWORD'], pfp=app.config['DEFAULT_USER_PFP'])
         u3 = User(name='Nicholas Tesla', uid='niko', pfp='niko.png', role='Teacher', password=app.config['DEFAULT_USER_PASSWORD'])
 
@@ -682,11 +682,12 @@ def initUsers():
         
         for user in users:
             try:
+                print(f"  > Creating user: {user.uid}")
                 user.create()
-            except IntegrityError:
-                '''fails with bad or duplicate data'''
+            except Exception as e:
+                '''fails with bad or duplicate data or connection errors'''
                 db.session.remove()
-                print(f"Records exist, duplicate email, or error: {user.uid}")
+                print(f"  > Error creating user {user.uid}: {str(e)}")
 
         s1 = Section(name='Computer Science A', abbreviation='CSA')
         s2 = Section(name='Computer Science Principles', abbreviation='CSP')
